@@ -33,7 +33,8 @@ class BiRNNT(BiRNN):
         hiddens_comb_masked = hiddens_comb.masked_select(mask_optim_expanded).view(-1, self.decoder_dim)
         decoded = self.decoder(hiddens_comb_masked)
         return F.log_softmax(decoded) #logsoftmax--->NLLLoss
-        def get_scores_d_all(self, records_u, idx_cur, vid_candidates, feature_al, is_train):  #id: current record id, want to predict record[id].vid_next
+     
+     def get_scores_d_all(self, records_u, idx_cur, vid_candidates, feature_al, is_train):  #id: current record id, want to predict record[id].vid_next
         feature_next = feature_al[idx_cur + 1].view(1, -1)
         coor_cur = self.vid_coor_nor[records_u.records[idx_cur].vid]
         records_al = records_u.records[0:records_u.test_idx if is_train else idx_cur + 1]
