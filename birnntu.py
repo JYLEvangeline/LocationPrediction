@@ -22,18 +22,25 @@ class BiRNNTU(BiRNN):
         embedding_t = self.embedder_t(tids_next_strip).view(-1, self.emb_dim_t)
         embedding_t_valid = embedding_t.masked_select(mask_long_valid.view(-1, 1).expand_as(embedding_t)).view(-1, self.emb_dim_t)
         return embedding_t_valid
-
-    def forward(self, vids_long, len_long, vids_short_al, len_short_al, tids_next, short_cnt, mask_long, mask_optim, mask_evaluate):
+    
+    def get_embeddeing_u(self, uid):
+        embedding_u = self.embedder_u(Variable(torch.LongTensor([uid])).view(1, -1)).view(1, -1)
+        embedding_u = F.relu(embedding_u)
+        return embedding_u_valid
+        
+    def forward(self, vids_long, len_long, vids_short_al, len_short_al, tids_next, short_cnt, mask_long, mask_optim, mask_evaluate,records_u):
         mask_long_valid = mask_long.index_select(1, Variable(torch.LongTensor(range(torch.max(len_long).data[0]))))
         mask_optim_valid = (mask_optim if len(mask_evaluate) == 0 else mask_evaluate).index_select(1, Variable(torch.LongTensor(xrange(torch.max(len_long).data[0])))).masked_select(mask_long_valid)
         embeddings_t = self.get_embedding_t(tids_next, len_long, mask_long_valid)
-        embeddings_u = self.embdder_u(u_id)
+        embeddings_u = self.get_embedding_u(records_u.uid)
         hiddens_long = self.get_hiddens_long(vids_long, len_long, mask_long_valid)
         hiddens_short = self.get_hiddens_short(vids_short_al, len_short_al,short_cnt)
         hiddens_comb = torch.cat((hiddens_long, hiddens_short, embeddings_t,embeddings_u), 1)
         mask_optim_expanded = mask_optim_valid.view(-1, 1).expand_as(hiddens_comb)
         hiddens_comb_masked = hiddens_comb.masked_select(mask_optim_expanded).view(-1, self.decoder_dim)
         decoded = self.decoder(hiddens_comb_masked)
+        idx_cur = records_u[0] #waiting to change
+        scores_d_all = self.get_scores_d_all(records_u, idx_cur, vid_candidates, feature_al, is_train)
         return F.log_softmax(decoded) #logsoftmax--->NLLLoss
      
      def get_scores_d_all(self, records_u, idx_cur, vid_candidates, feature_al, is_train):  #id: current record id, want to predict record[id].vid_next
