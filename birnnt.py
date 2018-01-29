@@ -33,3 +33,31 @@ class BiRNNT(BiRNN):
         hiddens_comb_masked = hiddens_comb.masked_select(mask_optim_expanded).view(-1, self.decoder_dim)
         decoded = self.decoder(hiddens_comb_masked)
         return F.log_softmax(decoded) #logsoftmax--->NLLLoss
+        def get_scores_d_all(self, records_u, idx_cur, vid_candidates, feature_al, is_train):  #id: current record id, want to predict record[id].vid_next
+        feature_next = feature_al[idx_cur + 1].view(1, -1)
+        coor_cur = self.vid_coor_nor[records_u.records[idx_cur].vid]
+        records_al = records_u.records[0:records_u.test_idx if is_train else idx_cur + 1]
+        atten_scores = Variable(torch.zeros(len(records_al)))
+        for idx_r, record in enumerate(records_al):
+            if idx_r == idx_cur + 1:
+                atten_scores.data[idx_r] = float('-inf')
+                continue
+            coor_r = self.vid_coor_nor[records_u.records[idx_r].vid]
+            dist = np.sqrt(np.sum((coor_cur - coor_r) ** 2))
+            feature_r = feature_al[idx_r].view(-1, 1)
+            feature_part = torch.mm(torch.mm(feature_next, self.att_M), feature_r)
+            dist_part = Variable(torch.FloatTensor([dist]))
+            score = self.att_merger(torch.cat((feature_part, dist_part), 0).view(1, -1))
+            atten_scores[idx_r] = score
+        atten_scores = F.softmax(atten_scores)
+
+        scores_d = Variable(torch.zeros(1, len(vid_candidates)))
+        for idx, vid_candidate in enumerate(vid_candidates):
+            score_sum = Variable(torch.zeros([1]))
+            for idx_r in xrange(len(records_al)):
+                if idx_r == idx_cur + 1:
+                    continue
+                score = self.get_d_score(records_al[idx_r].vid, vid_candidate)
+                score_sum += atten_scores[idx_r] * score
+            scores_d[0, idx] = score_sum
+        return scores_d
