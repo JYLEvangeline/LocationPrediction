@@ -7,13 +7,14 @@ from torch.autograd import Variable
 use_cuda = torch.cuda.is_available()
 # use_cuda = False
 
-class BiRNNT(BiRNN):
+class BiRNNTU(BiRNN):
     def __init__(self, v_size, t_size, emb_dim_v, emb_dim_t, hidden_dim):
         super(BiRNNT, self).__init__(v_size, emb_dim_v, hidden_dim)
         self.t_size = t_size
         self.emb_dim_t = emb_dim_t
         self.embedder_t = nn.Embedding(t_size, self.emb_dim_t, padding_idx=0)
-        self.decoder_dim = self.hidden_dim * 2 + self.emb_dim_t
+        self.embedder_u = nn.Embedding(u_size,self.emb_dim_u, padding_idx=0)
+        self.decoder_dim = self.hidden_dim * 2 + self.emb_dim_t + self.emb_dim_u
         self.decoder = nn.Linear(self.decoder_dim, self.v_size)
 
     def get_embedding_t(self, tids_next, len_long, mask_long_valid):
@@ -26,9 +27,10 @@ class BiRNNT(BiRNN):
         mask_long_valid = mask_long.index_select(1, Variable(torch.LongTensor(range(torch.max(len_long).data[0]))))
         mask_optim_valid = (mask_optim if len(mask_evaluate) == 0 else mask_evaluate).index_select(1, Variable(torch.LongTensor(xrange(torch.max(len_long).data[0])))).masked_select(mask_long_valid)
         embeddings_t = self.get_embedding_t(tids_next, len_long, mask_long_valid)
+        embeddings_u = self.embdder_u(u_id)
         hiddens_long = self.get_hiddens_long(vids_long, len_long, mask_long_valid)
         hiddens_short = self.get_hiddens_short(vids_short_al, len_short_al,short_cnt)
-        hiddens_comb = torch.cat((hiddens_long, hiddens_short, embeddings_t), 1)
+        hiddens_comb = torch.cat((hiddens_long, hiddens_short, embeddings_t,embeddings_u), 1)
         mask_optim_expanded = mask_optim_valid.view(-1, 1).expand_as(hiddens_comb)
         hiddens_comb_masked = hiddens_comb.masked_select(mask_optim_expanded).view(-1, self.decoder_dim)
         decoded = self.decoder(hiddens_comb_masked)
