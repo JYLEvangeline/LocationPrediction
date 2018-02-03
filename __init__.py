@@ -16,6 +16,7 @@ if __name__ == "__main__":
            'train_data_file': path + 'train.txt',
            'test_data_file': path + 'test.txt',
            'coor_nor_file': path + 'coor_nor.txt',
+           'distance_file' : path + 'distance.txt',
            'train_log_file': path + 'log.txt',
            'id_offset': 1,
            'n_epoch': 80,
@@ -24,6 +25,7 @@ if __name__ == "__main__":
            'load_model': False,
            'emb_dim_v': 32,
            'emb_dim_t': 8,
+           'emb_dim_u': 32,# !!!jiayi  copy from v3
            'hidden_dim': 16,
            'save_gap': 20,
            'dropout': 0.5,
@@ -31,7 +33,7 @@ if __name__ == "__main__":
            }
     dataset = DataSet(opt)
     manager = ModelManager(opt)
-    model_type = 'birnn'
+    model_type = 'birnnt'
     manager.build_model(model_type, dataset)
     print "evaluate"
     manager.evaluate(model_type, dataset)

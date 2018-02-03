@@ -58,6 +58,7 @@ class CheckinData(Dataset):
         tids = np.zeros(self.max_long_len, dtype=np.int)
         vids_next = np.zeros(self.max_long_len, dtype=np.int)
         tids_next = np.zeros(self.max_long_len, dtype=np.int)
+        uids_next = np.zeros(self.max_long_len, dtype=np.int)
         vids_short_al = np.zeros((self.max_session_len, self.max_short_len), dtype=np.int)
         mask_long = np.zeros(self.max_long_len, dtype=np.int)
         mask_test = np.zeros(self.max_long_len, dtype=np.int)
@@ -78,6 +79,7 @@ class CheckinData(Dataset):
             tids[i] = self.uid_tids[uid][i]
             vids_next[i] = self.uid_vids_next[uid][i]
             tids_next[i] = self.uid_tids_next[uid][i]
+            uids_next[i] = uid
             mask_long[i] = 1
         for i in xrange(len(len_short_al)):
             for j in xrange(len_short_al[i]):
@@ -88,11 +90,19 @@ class CheckinData(Dataset):
                 if j != len(self.uid_vids_short_al[uid][i]) - 1:
                     mask_test[idx] = 1
                 idx += 1
+            '''
         return torch.from_numpy(vids_long), torch.from_numpy(vids_short_al), torch.from_numpy(tids), \
                torch.LongTensor([len_long]), torch.from_numpy(len_short_al), \
                torch.from_numpy(mask_long).byte(), torch.from_numpy(mask_test).byte(), \
                torch.from_numpy(vids_next), torch.from_numpy(tids_next), \
                torch.LongTensor([uid]), torch.LongTensor([self.uid_test_idx[uid]]), torch.LongTensor([len(self.uid_vids_short_al[uid])])
+               '''
+        return torch.from_numpy(vids_long), torch.from_numpy(vids_short_al), torch.from_numpy(tids), \
+               torch.LongTensor([len_long]), torch.from_numpy(len_short_al), \
+               torch.from_numpy(mask_long).byte(), torch.from_numpy(mask_test).byte(), \
+               torch.from_numpy(vids_next), torch.from_numpy(tids_next), \
+               torch.from_numpy(uids_next), torch.LongTensor([self.uid_test_idx[uid]]), torch.LongTensor(
+            [len(self.uid_vids_short_al[uid])])
 
 class Vocabulary:
     def __init__(self, data_file, id_offset=0):
@@ -110,6 +120,16 @@ class Vocabulary:
     def size(self):
         return len(self.id_name) + self.id_offset
 
+def read_distance(root_path):
+    result = []
+    with open(root_path, 'r') as f:
+        for line in f.readlines():
+            al = line.strip().split(',')
+            al_float = map(eval,al)
+            result.append(al_float)
+    return result
+
+
 class DataSet:
     def __init__(self, opt):
         u_vocab_file = opt['u_vocab_file']
@@ -118,6 +138,7 @@ class DataSet:
         train_file = opt['train_data_file']
         test_file = opt['test_data_file']
         coor_file = opt['coor_nor_file']
+        distance_file = opt['distance_file']
         batch_size = opt['batch_size']
         n_worker = opt['data_worker']
         id_offset = opt['id_offset']
@@ -128,6 +149,8 @@ class DataSet:
         train_data = CheckinData(train_file, id_offset=id_offset)
         test_data = CheckinData(test_file, id_offset=id_offset)
         vid_coor_nor = np.loadtxt(coor_file, delimiter=',', dtype=np.float64)
+        #self.distance = read_distance(distance_file)
+        self.distance = 0
         self.train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=n_worker)
         self.test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=True, num_workers=n_worker)
 

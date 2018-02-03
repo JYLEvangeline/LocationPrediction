@@ -564,6 +564,32 @@ def transform_data(root_path):
         #     for record in dl.uid_records[0].records:
         #         record.peek()
 
+def distance_data(root_path):
+    coor_file = root_path + 'coor_nor.txt'
+    f_distance = open(root_path + "distance.txt", 'w')
+    vid_coor_nor = np.loadtxt(coor_file, delimiter=',', dtype=np.float64)
+    for i in range(len(vid_coor_nor)-1):
+        distance = []
+        for j in range(i + 1, len(vid_coor_nor)):
+            distance.append(np.sqrt(np.sum((vid_coor_nor[i] - vid_coor_nor[j]) ** 2)))
+        f_distance.write(','.join([str(d) for d in distance]) + '\n')
+
+        print(i)
+    f_distance.close()
+    return vid_coor_nor
+
+def read_distance(root_path):
+    result = []
+    i=0
+    with open(root_path+"distance.txt", 'r') as f:
+        for line in f.readlines():
+            print(i)
+            i = i+1
+            al = line.strip().split(',')
+            al_float = map(eval,al)
+            result.append(al_float)
+    return result
+
 if __name__ == "__main__":
     root_path = '/Users/quanyuan/Dropbox/Research/LocationCuda/' \
         if os.path.exists('/Users/quanyuan/Dropbox/Research/LocationCuda/') \
@@ -574,7 +600,13 @@ if __name__ == "__main__":
     #prepare_data(root_path, root_path + 'full/', task=2)  #4
     #analyze_time_dist(root_path + 'full/') #5?
     #analyze_session_len(root_path + 'full/') #6?
-    transform_data(root_path + 'full/') #7?
+    #transform_data(root_path + 'full/') #7?
+    #coor=distance_data('LocationCuda/' + 'small/foursquare/')
+    #coor = distance_data('LocationCuda/' + 'full/foursquare/')
+    result = read_distance('LocationCuda/' + 'small/foursquare/')
+
+    #distance_data('LocationCuda/' + 'full/foursquare/')
+
 
     # prepare_data(root_path, root_path + 'full/', task=2)
     #prepare_data(root_path, root_path + 'small/', u_cnt_max=500, task=2)

@@ -15,8 +15,8 @@ class BiRNNT(BiRNN):
         self.emb_dim_u = emb_dim_u
         self.embedder_t = nn.Embedding(t_size, self.emb_dim_t, padding_idx=0)
         self.embedder_u = nn.Embedding(u_size,self.emb_dim_u,padding_idx=0)
-        self.embedder_lat = nn.Embeddign(l_size,self.emb_dim_l,padding_idx=0)
-        self.embedder_lon = nn.Embedding(l_size,self.embd_dim_l,padding_idx=0)
+        #self.embedder_lat = nn.Embedding(l_size,self.emb_dim_l,padding_idx=0)
+        #self.embedder_lon = nn.Embedding(l_size,self.embd_dim_l,padding_idx=0)
         self.decoder_dim = self.hidden_dim * 2 + self.emb_dim_t + self.emb_dim_u
         self.decoder = nn.Linear(self.decoder_dim, self.v_size)
         self.distance = distance

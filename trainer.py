@@ -33,8 +33,8 @@ class Trainer:
         total_loss = 0.0
         for i, data_batch in enumerate(train_data):
             self.optimizer.zero_grad()
-            vids_long, len_long, vids_short_al, len_short_al, tids_next, short_cnt, mask_long, vids_next, mask_optim, mask_evaluate = self.convert_to_variable(data_batch)
-            outputs = self.model(vids_long, len_long, vids_short_al, len_short_al, tids_next, short_cnt, mask_long, mask_optim, mask_evaluate)
+            uids,vids_long, len_long, vids_short_al, len_short_al, tids_next, short_cnt, mask_long, vids_next, mask_optim, mask_evaluate = self.convert_to_variable(data_batch)
+            outputs = self.model(uids,vids_long, len_long, vids_short_al, len_short_al, tids_next, short_cnt, mask_long, mask_optim, mask_evaluate)
             loss = self.criterion(outputs, vids_next)
             loss.backward()
             self.optimizer.step()
@@ -72,6 +72,6 @@ class Trainer:
         # print 'test_idx: ', test_idx
         # print 'vids_next: ', vids_next
         if use_cuda:
-            return vids_long.cuda(), len_long.cuda(), vids_short_al.cuda(), len_short_al.cuda(), tids_next, short_cnt.cuda(), mask_long.cuda(), vids_next.cuda(), mask_optim.cuda(), mask_evaluate.cuda()
+            return uids.cuda(),vids_long.cuda(), len_long.cuda(), vids_short_al.cuda(), len_short_al.cuda(), tids_next, short_cnt.cuda(), mask_long.cuda(), vids_next.cuda(), mask_optim.cuda(), mask_evaluate.cuda()
         else:
-            return vids_long, len_long, vids_short_al, len_short_al, tids_next, short_cnt, mask_long, vids_next, mask_optim, mask_evaluate
+            return uids,vids_long, len_long, vids_short_al, len_short_al, tids_next, short_cnt, mask_long, vids_next, mask_optim, mask_evaluate
