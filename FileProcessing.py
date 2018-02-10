@@ -601,9 +601,9 @@ if __name__ == "__main__":
     #analyze_time_dist(root_path + 'full/') #5?
     #analyze_session_len(root_path + 'full/') #6?
     #transform_data(root_path + 'full/') #7?
-    #coor=distance_data('LocationCuda/' + 'small/foursquare/')
-    #coor = distance_data('LocationCuda/' + 'full/foursquare/')
-    result = read_distance('LocationCuda/' + 'small/foursquare/')
+    coor=distance_data('LocationCuda/' + 'small/foursquare/')
+    coor = distance_data('LocationCuda/' + 'full/foursquare/')
+    #result = read_distance('LocationCuda/' + 'small/foursquare/')
 
     #distance_data('LocationCuda/' + 'full/foursquare/')
 
