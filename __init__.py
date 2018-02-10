@@ -5,6 +5,7 @@ from model_manager import ModelManager
 
 
 if __name__ == "__main__":
+    emb_dim_v = int(input('please input emb_dim_v: 8 16 32 64 etc'))
     torch.manual_seed(3)
     root_path = '/Users/quanyuan/Dropbox/Research/LocationCuda/' if os.path.exists('/Users/quanyuan/Dropbox/Research/LocationCuda/') else 'LocationCuda/'
     dataset_name = 'foursquare'
@@ -23,10 +24,11 @@ if __name__ == "__main__":
            'batch_size': 50,
            'data_worker': 1,
            'load_model': False,
-           'emb_dim_v': 32,
-           'emb_dim_t': 8,
+           'emb_dim_d': 16, # for distance embedding  #best 16
+           'emb_dim_v': emb_dim_v,  #origin 32
+           'emb_dim_t': 8, #origin 8
            'emb_dim_u': 32,# !!!jiayi  copy from v3
-           'hidden_dim': 16,
+           'hidden_dim': 16, #origin 16
            'save_gap': 20,
            'dropout': 0.5,
            'epoch': 80

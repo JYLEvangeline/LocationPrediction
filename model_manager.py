@@ -12,11 +12,11 @@ class ModelManager:
         self.opt = opt
         self.model_path = opt['path'] + 'model/'
 
-    def init_model(self, model_type, u_size, v_size, t_size):
+    def init_model(self, model_type, u_size, v_size, t_size,distance):
         if model_type == 'birnn':
             return BiRNN(v_size, self.opt['emb_dim_v'], self.opt['hidden_dim'])
         elif model_type == 'birnnt':
-            return BiRNNT(v_size, t_size, self.opt['emb_dim_v'], self.opt['emb_dim_t'],self.opt['hidden_dim'])
+            return BiRNNT(v_size, t_size, u_size, self.opt['emb_dim_v'], self.opt['emb_dim_t'],self.opt['emb_dim_u'],self.opt['emb_dim_d'],self.opt['hidden_dim'],distance)
         elif model_type == 'serm':
             w_size = 1
             return SERM(u_size, v_size, t_size, w_size)
@@ -25,7 +25,7 @@ class ModelManager:
 
     def build_model(self, model_type, dataset):
         print 'build_model'
-        model = self.init_model(model_type, dataset.u_vocab.size(), dataset.v_vocab.size(), dataset.t_vocab.size())
+        model = self.init_model(model_type, dataset.u_vocab.size(), dataset.v_vocab.size(), dataset.t_vocab.size(),dataset.distance)
         if self.opt['load_model']:
             self.load_model(model, model_type, self.opt['epoch'])
             train_time = 0.0
@@ -37,7 +37,7 @@ class ModelManager:
 
     def evaluate(self, model_type, dataset):
         print 'evaluate'
-        model = self.init_model(model_type, dataset.u_vocab.size(), dataset.v_vocab.size(), dataset.t_vocab.size())
+        model = self.init_model(model_type, dataset.u_vocab.size(), dataset.v_vocab.size(), dataset.t_vocab.size(),dataset.distance)
         self.load_model(model, model_type, self.opt['epoch'])
         evaluator = Evaluator(model, self.opt)
         evaluator.eval(dataset.test_loader)

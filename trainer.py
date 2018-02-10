@@ -21,6 +21,7 @@ class Trainer:
     def train(self, train_data, model_manager):
         start = time.time()
         for epoch in xrange(self.n_epoch):
+            print epoch
             epoch_loss = self.train_one_epoch(train_data, epoch)
             if (epoch + 1) % self.save_gap == 0:
                 print 'epoch: ', epoch + 1, '\tloss: ', epoch_loss
@@ -71,7 +72,8 @@ class Trainer:
         # print 'len_long: ', len_long
         # print 'test_idx: ', test_idx
         # print 'vids_next: ', vids_next
-        if use_cuda:
-            return uids.cuda(),vids_long.cuda(), len_long.cuda(), vids_short_al.cuda(), len_short_al.cuda(), tids_next, short_cnt.cuda(), mask_long.cuda(), vids_next.cuda(), mask_optim.cuda(), mask_evaluate.cuda()
-        else:
-            return uids,vids_long, len_long, vids_short_al, len_short_al, tids_next, short_cnt, mask_long, vids_next, mask_optim, mask_evaluate
+        return uids,vids_long, len_long, vids_short_al, len_short_al, tids_next, short_cnt, mask_long, vids_next, mask_optim, mask_evaluate
+        #if use_cuda:
+        #    return uids.cuda(),vids_long.cuda(), len_long.cuda(), vids_short_al.cuda(), len_short_al.cuda(), tids_next, short_cnt.cuda(), mask_long.cuda(), vids_next.cuda(), mask_optim.cuda(), mask_evaluate.cuda()
+        #else:
+        #    return uids,vids_long, len_long, vids_short_al, len_short_al, tids_next, short_cnt, mask_long, vids_next, mask_optim, mask_evaluate

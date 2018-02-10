@@ -149,8 +149,10 @@ class DataSet:
         train_data = CheckinData(train_file, id_offset=id_offset)
         test_data = CheckinData(test_file, id_offset=id_offset)
         vid_coor_nor = np.loadtxt(coor_file, delimiter=',', dtype=np.float64)
-        #self.distance = read_distance(distance_file)
-        self.distance = 0
+        print "begin reading"
+        self.distance = read_distance(distance_file)
+        print "distance_read"
+        #self.distance = np.ones((3556,3556)) #just for test
         self.train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=n_worker)
         self.test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=True, num_workers=n_worker)
 

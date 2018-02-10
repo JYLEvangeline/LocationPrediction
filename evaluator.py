@@ -17,9 +17,9 @@ class Evaluator:
         hits = np.zeros(3)
         cnt = 0
         for data_batch in test_data:
-            vids_long, len_long, vids_short_al, len_short_al, tids_next, short_cnt, mask_long, vids_next, mask_optim, mask_evaluate = self.convert_to_variable(
+            uids, vids_long, len_long, vids_short_al, len_short_al, tids_next, short_cnt, mask_long, vids_next, mask_optim, mask_evaluate = self.convert_to_variable(
                 data_batch)
-            outputs = self.model(vids_long, len_long, vids_short_al, len_short_al, tids_next, short_cnt, mask_long,
+            outputs = self.model(uids, vids_long, len_long, vids_short_al, len_short_al, tids_next, short_cnt, mask_long,
                                  mask_optim, mask_evaluate)
             hits_batch = self.get_hits(outputs, vids_next)
             hits += hits_batch
@@ -59,7 +59,7 @@ class Evaluator:
         short_cnt = Variable(data_batch[11])
         mask_evaluate = Variable(torch.zeros(0))
         # if there are records for evaluation
-        if torch.sum(len_long - test_idx, 0).data[0] > 0:
+        if torch.sum(len_long - test_idx, 0).data[0] >   0:
         #if torch.sum(len_long - test_idx, 0).data[0, 0] > 0:
             mask_evaluate = mask_optim.clone()
             for uid in xrange(len_long.size(0)):
@@ -71,7 +71,8 @@ class Evaluator:
         # print 'len_long: ', len_long
         # print 'test_idx: ', test_idx
         # print 'vids_next: ', vids_next
-        if use_cuda:
-            return vids_long.cuda(), len_long.cuda(), vids_short_al.cuda(), len_short_al.cuda(), tids_next, short_cnt.cuda(), mask_long.cuda(), vids_next.cuda(), mask_optim.cuda(), mask_evaluate.cuda()
-        else:
-            return vids_long, len_long, vids_short_al, len_short_al, tids_next, short_cnt, mask_long, vids_next, mask_optim, mask_evaluate
+        return uids, vids_long, len_long, vids_short_al, len_short_al, tids_next, short_cnt, mask_long, vids_next, mask_optim, mask_evaluate
+        #if use_cuda:
+        #    return uids.cuda(), vids_long.cuda(), len_long.cuda(), vids_short_al.cuda(), len_short_al.cuda(), tids_next, short_cnt.cuda(), mask_long.cuda(), vids_next.cuda(), mask_optim.cuda(), mask_evaluate.cuda()
+        #else:
+        #    return uids, vids_long, len_long, vids_short_al, len_short_al, tids_next, short_cnt, mask_long, vids_next, mask_optim, mask_evaluate

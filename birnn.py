@@ -18,6 +18,7 @@ class BiRNN(nn.Module):
         self.embedder_v = nn.Embedding(self.v_size, self.emb_dim_v, padding_idx=0)
         self.decoder = nn.Linear(self.hidden_dim * 2, self.v_size)
 
+
     def get_hiddens_short(self, vids_short_al, len_short_al, short_cnt):
         session_cnt_total = torch.sum(short_cnt, dim=0).data[0]
         max_session_length_a_user = torch.max(len_short_al).data[0]
@@ -91,5 +92,6 @@ class BiRNN(nn.Module):
     def init_hidden(self, batch_size=1):
         hidden = Variable(torch.zeros(1, batch_size, self.hidden_dim))
         if use_cuda:
-            hidden = hidden.cuda()
+            #hidden = hidden.cuda()
+            hidden  = hidden
         return hidden
