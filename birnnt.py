@@ -53,13 +53,42 @@ class BiRNNT(BiRNN):
         return F.log_softmax(decoded)
 
     def get_scores_d_all(self,vids_long, len_long, mask_long_valid):
+        '''
         distance_vids_score = Variable(torch.zeros(self.v_size,1))
         for idx,(len_long_vid,vid) in enumerate(zip(len_long,vids_long)):
             distance_vid_score = self.get_scores_d(vid,len_long_vid)
             distance_vids_score = torch.cat((distance_vids_score,distance_vid_score),1)
         #ds = Variable(torch.FloatTensor(distance_vids_score))
         distance_vids_score = np.delete(distance_vids_score.data.numpy(),0,1)
-        distance_vids_score = Variable(torch.LongTensor(distance_vids_score))
+        #distance_vids_score = Variable(torch.LongTensor(distance_vids_score))
+        distance_vids_score = Variable(torch.FloatTensor(distance_vids_score))
+        ds = torch.t(distance_vids_score)
+        ds_strip = ds.index_select(1, Variable(torch.LongTensor(range(torch.max(len_long).data[0]))))
+        embedding_d = self.embedder_d2(ds_strip).view(-1, self.emb_dim_d)
+        embedding_d_valid = embedding_d.masked_select(mask_long_valid.view(-1, 1).expand_as(embedding_d)).view(-1, self.emb_dim_d)
+        '''
+        distance_vids_score = Variable(torch.zeros(self.v_size,1))
+        for idx,(len_long_vid,vid) in enumerate(zip(len_long,vids_long)):
+            distance_vid_score = self.get_scores_d(vid,len_long_vid)
+            distance_vids_score = torch.cat((distance_vids_score,distance_vid_score),1)
+        #ds = Variable(torch.FloatTensor(distance_vids_score))
+        distance_vids_score = np.delete(distance_vids_score.data.numpy(),0,1) #49*5670 np *10000
+
+        '''
+        distance_vids_score1 = Variable(torch.LongTensor(distance_vids_score))  # 5671*50 long
+        ds1 = torch.t(distance_vids_score1)
+        ds_strip1 = ds1.index_select(1, Variable(torch.LongTensor(range(torch.max(len_long).data[0]))))
+        embedding_d1 = self.embedder_d2(ds_strip1).view(-1, self.emb_dim_d)
+        embedding_d_valid1 = embedding_d1.masked_select(mask_long_valid.view(-1, 1).expand_as(embedding_d1)).view(-1,self.emb_dim_d)
+        '''
+        a = np.full((len(distance_vids_score), len(distance_vids_score[0])), 100)
+        m = distance_vids_score.min()
+        if m < 0:
+            b = np.full((len(distance_vids_score), len(distance_vids_score[0])), -m)
+            distance_vids_score = (distance_vids_score + b) * a
+        else:
+            distance_vids_score = distance_vids_score * a
+        distance_vids_score = Variable(torch.LongTensor(distance_vids_score)) #5671*50 long
         ds = torch.t(distance_vids_score)
         ds_strip = ds.index_select(1, Variable(torch.LongTensor(range(torch.max(len_long).data[0]))))
         embedding_d = self.embedder_d2(ds_strip).view(-1, self.emb_dim_d)
@@ -70,10 +99,11 @@ class BiRNNT(BiRNN):
         vid = vid.data.numpy()
         vid_d = np.zeros((self.v_size,self.v_size))
         for i in range(len_long_vid):
-            for j in range(len_long_vid):
+            for j in range(i,len_long_vid):
                 vid_d[i][j] = self.get_distance(vid[i],vid[j])
+                vid_d[j][i] = vid_d[i][j]
         vid_d = Variable(torch.t(torch.FloatTensor(vid_d)))
-        distance_vid_score = self.linear_d1(vid_d)
+        distance_vid_score = torch.abs((self.linear_d1(vid_d)))
         return distance_vid_score
 
     def get_distance(self,v1,v2):
