@@ -89,6 +89,7 @@ class BiRNNT(BiRNN):
         else:
             distance_vids_score = distance_vids_score * a
         distance_vids_score = Variable(torch.LongTensor(distance_vids_score)) #5671*50 long
+
         ds = torch.t(distance_vids_score)
         ds_strip = ds.index_select(1, Variable(torch.LongTensor(range(torch.max(len_long).data[0]))))
         embedding_d = self.embedder_d2(ds_strip).view(-1, self.emb_dim_d)
@@ -103,7 +104,7 @@ class BiRNNT(BiRNN):
                 vid_d[i][j] = self.get_distance(vid[i],vid[j])
                 vid_d[j][i] = vid_d[i][j]
         vid_d = Variable(torch.t(torch.FloatTensor(vid_d)))
-        distance_vid_score = torch.abs((self.linear_d1(vid_d)))
+        distance_vid_score = self.linear_d1(vid_d)
         return distance_vid_score
 
     def get_distance(self,v1,v2):

@@ -19,9 +19,10 @@ class ModelManager:
             return BiRNNT(v_size, t_size, u_size, self.opt['emb_dim_v'], self.opt['emb_dim_t'],self.opt['emb_dim_u'],self.opt['emb_dim_d'],self.opt['hidden_dim'],distance)
         elif model_type == 'serm':
             w_size = 1
-            return SERM(u_size, v_size, t_size, w_size)
+            #return SERM(u_size, v_size, t_size, w_size)
         elif model_type == 'strnn':
             return STRNN(u_size, v_size)
+
 
     def build_model(self, model_type, dataset):
         print 'build_model'
